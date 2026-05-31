@@ -1,6 +1,8 @@
 # 🎖️ Military & Security Services Pension Fund (MSSPF) Portal
 ### Sultanate of Oman | Integrated Multi-Portal Administration Suite
 
+https://mssf-portal.vercel.app/calculator
+
 Welcome to the official repository of the **MSSPF Client Website & Multi-Portal Administration Platform**. This platform is a state-of-the-art, high-fidelity Angular 21 application built to represent a prestigious, government-grade administrative environment for the Sultanate of Oman.
 
 The system is designed with **Tailwind CSS v4** and incorporates a luxurious design system reflecting the dignity of national service: a tailored palette of military brown (`#3E321A`), olive gold (`#9E9B46`), sand cream (`#FAF6F0`), and golden amber highlights (`#D39D55`), fully responsive layouts, smooth micro-animations, and complete bidirectionality (English LTR and Arabic RTL with physical mirroring).
