@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { LanguageService } from '../../../core/services/language.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AdminDataService } from '../../../core/services/admin-data.service';
 import { BreadcrumbComponent } from '../../../shared/breadcrumb/breadcrumb.component';
 import { StepperComponent } from '../../../shared/stepper/stepper.component';
 import { FileUploaderComponent } from '../../../shared/file-uploader/file-uploader.component';
@@ -287,6 +288,7 @@ export class ClaimComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly notification = inject(NotificationService);
+  private readonly adminData = inject(AdminDataService);
 
   readonly currentStep = signal<number>(0);
   readonly stepLabels = signal<string[]>(['Deceased Info', 'Applicant Info', 'Bank Details', 'Document Uploads', 'Review & Submit']);
@@ -402,6 +404,25 @@ export class ClaimComponent implements OnInit {
   submitClaim(): void {
     // Perform final validation checks
     if (this.claimForm.invalid || this.isStepInvalid()) return;
+
+    // Push the claim to AdminDataService shared signal
+    const decVal = this.claimForm.value.deceased || {};
+    const appVal = this.claimForm.value.applicant || {};
+    const bankVal = this.claimForm.value.bank || {};
+    const docsVal = this.docs();
+
+    this.adminData.addFuneralClaim({
+      deceasedId: decVal.civilId || 'Unknown ID',
+      deceasedName: `Deceased Officer (${decVal.civilId})`,
+      applicantName: appVal.name || 'Anonymous Applicant',
+      applicantPhone: appVal.mobile || '99999999',
+      relationship: appVal.relationship || 'Relative',
+      iban: bankVal.iban || 'OM48BANK0000000000000000',
+      heirCert: docsVal['heirCert']?.name || 'heir_certificate.pdf',
+      deathCert: docsVal['deathCert']?.name || 'death_certificate.pdf',
+      applicantId: docsVal['applicantId']?.name || 'applicant_id.pdf',
+      bankCard: docsVal['bankCard']?.name || 'bank_card.pdf'
+    });
 
     this.notification.success(
       this.lang.isRtl()

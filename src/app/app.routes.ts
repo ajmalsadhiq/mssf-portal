@@ -30,6 +30,10 @@ export const routes: Routes = [
     loadChildren: () => import('./portals/court/court.component').then(m => m.courtRoutes)
   },
   {
+    path: 'admin',
+    loadChildren: () => import('./portals/admin/admin.routes').then(m => m.adminRoutes)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

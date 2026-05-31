@@ -35,12 +35,12 @@ interface SidebarItem {
     <aside 
       class="fixed inset-y-0 top-20 z-20 flex flex-col border-accent/20 bg-primary text-stone-200 transition-all duration-300 shadow-xl overflow-y-auto"
       [ngClass]="{
-        'w-64': isOpen() && !isCollapsed(),
-        'w-20': !isOpen() || isCollapsed(),
-        'lg:translate-x-0': true,
-        'translate-x-full': lang.isRtl() && !isOpen(),
-        '-translate-x-full': !lang.isRtl() && !isOpen(),
-        'lg:relative lg:translate-x-0': true,
+        'w-64 lg:w-64': !isCollapsed(),
+        'w-64 lg:w-20': isCollapsed(),
+        'translate-x-0 lg:translate-x-0': isOpen(),
+        'translate-x-full lg:translate-x-0': lang.isRtl() && !isOpen(),
+        '-translate-x-full lg:translate-x-0': !lang.isRtl() && !isOpen(),
+        'lg:relative': true,
         'right-0 border-l': lang.isRtl(),
         'left-0 border-r': !lang.isRtl()
       }"

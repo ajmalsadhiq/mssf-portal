@@ -1,8 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LanguageService } from '../../core/services/language.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { AdminDataService } from '../../core/services/admin-data.service';
 import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 import { DataTableComponent, TableColumn } from '../../shared/table/table.component';
 import { AppHeaderComponent } from '../../shared/header/header.component';
@@ -183,6 +184,7 @@ export class BankComponent {
   readonly lang = inject(LanguageService);
   private readonly fb = inject(FormBuilder);
   private readonly notification = inject(NotificationService);
+  private readonly adminData = inject(AdminDataService);
 
   readonly isLoggedIn = signal<boolean>(false);
   readonly activeForm = signal<'deduct' | 'stop'>('deduct');
@@ -200,26 +202,17 @@ export class BankComponent {
     { key: 'status', label: 'Ledger Status', sortable: true, type: 'badge' }
   ];
 
-  readonly ledgerLogs = signal<DeductionLog[]>([
-    {
-      ref: 'MSSPF/REQ/85910',
-      civilId: '08412952',
-      borrower: 'Major General Salem Al-Harthy',
-      loanAmount: 25000,
-      deductionAmount: 250.000,
-      type: 'Active Deduction',
-      status: 'Pending Review'
-    },
-    {
-      ref: 'MSSPF/REQ/81042',
-      civilId: '05910482',
-      borrower: 'Major Ahmed Al-Masroori',
-      loanAmount: 18000,
-      deductionAmount: 180.000,
-      type: 'Stop Directive',
-      status: 'Approved & Processed'
-    }
-  ]);
+  readonly ledgerLogs = computed(() => {
+    return this.adminData.bankDeductions().map(d => ({
+      ref: d.ref,
+      civilId: d.civilId,
+      borrower: d.borrower,
+      loanAmount: d.loanAmount,
+      deductionAmount: d.deductionAmount,
+      type: d.type,
+      status: d.status
+    }));
+  });
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -255,20 +248,18 @@ export class BankComponent {
     if (this.deductionForm.invalid) return;
 
     const { borrower, civilId, loanAmount, deductionAmount } = this.deductionForm.value;
-    const ref = `MSSPF/REQ/${Math.floor(10000 + Math.random() * 90000)}`;
-
-    const newLog: DeductionLog = {
-      ref,
+    
+    // Push the bank deduction request to the Admin command signal!
+    this.adminData.addBankDeduction({
       civilId,
       borrower,
       loanAmount,
       deductionAmount,
       type: 'Active Deduction',
-      status: 'Pending Review'
-    };
+      bankName: 'Bank Muscat'
+    });
 
-    this.ledgerLogs.update(logs => [newLog, ...logs]);
-    this.notification.success(`Loan deduction request filed successfully. Ref: ${ref}`);
+    this.notification.success(`Loan deduction request filed successfully and is pending administrative review.`);
     this.deductionForm.reset({ loanAmount: 10000, deductionAmount: 100 });
   }
 
@@ -276,20 +267,17 @@ export class BankComponent {
     if (this.stopForm.invalid) return;
 
     const { loanRef } = this.stopForm.value;
-    const ref = `MSSPF/REQ/${Math.floor(10000 + Math.random() * 90000)}`;
 
-    const newLog: DeductionLog = {
-      ref,
+    this.adminData.addBankDeduction({
       civilId: '08412952',
       borrower: 'Major General Salem Al-Harthy',
       loanAmount: 25000,
       deductionAmount: 250.000,
       type: 'Stop Directive',
-      status: 'Pending Review'
-    };
+      bankName: 'Bank Muscat'
+    });
 
-    this.ledgerLogs.update(logs => [newLog, ...logs]);
-    this.notification.success(`Stop loan deduction directive filed successfully. Ref: ${ref}`);
+    this.notification.success(`Stop loan deduction directive filed successfully and is pending administrative review.`);
     this.stopForm.reset({ stopDate: new Date().toISOString().split('T')[0] });
   }
 }

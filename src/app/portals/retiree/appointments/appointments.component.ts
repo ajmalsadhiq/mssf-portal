@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LanguageService } from '../../../core/services/language.service';
@@ -6,6 +6,7 @@ import { NotificationService } from '../../../core/services/notification.service
 import { BreadcrumbComponent } from '../../../shared/breadcrumb/breadcrumb.component';
 import { DataTableComponent, TableColumn } from '../../../shared/table/table.component';
 import { CalendarSlotPickerComponent } from '../../../shared/slot-picker/slot-picker.component';
+import { AdminDataService } from '../../../core/services/admin-data.service';
 
 interface Appointment {
   id: string;
@@ -13,7 +14,7 @@ interface Appointment {
   date: string;
   time: string;
   officer: string;
-  status: 'Approved & Processed' | 'Pending Review';
+  status: 'Approved & Processed' | 'Pending Review' | 'Rejected / Returned';
 }
 
 @Component({
@@ -146,6 +147,7 @@ interface Appointment {
 export class AppointmentsComponent {
   readonly lang = inject(LanguageService);
   private readonly notification = inject(NotificationService);
+  readonly adminData = inject(AdminDataService);
 
   readonly activeView = signal<'list' | 'book'>('list');
   readonly meetingChannel = signal<'in-person' | 'phone'>('in-person');
@@ -162,24 +164,20 @@ export class AppointmentsComponent {
     { key: 'status', label: 'Approval Status', sortable: true, type: 'badge' }
   ];
 
-  readonly appointments = signal<Appointment[]>([
-    {
-      id: 'MSSPF/APT/709',
-      type: 'Phone Consultation',
-      date: '2026-06-03',
-      time: '10:30 AM',
-      officer: 'Officer Khalid Al-Masroori',
-      status: 'Pending Review'
-    },
-    {
-      id: 'MSSPF/APT/612',
-      type: 'In-Person (HQ Office)',
-      date: '2026-05-18',
-      time: '12:30 PM',
-      officer: 'Major Salim Al-Habsi',
-      status: 'Approved & Processed'
-    }
-  ]);
+  readonly appointments = computed(() => {
+    return this.adminData.appointments()
+      .filter(a => a.officerId === '08412952') // Filtered by Salim Al-Abri
+      .map(a => ({
+        id: `MSSPF/APT/${a.id.replace('apt-', '')}`,
+        type: a.channel === 'In-Person' ? 'In-Person (HQ Office)' : 'Phone Consultation',
+        date: a.date,
+        time: a.timeSlot,
+        officer: 'Officer Khalid Al-Masroori',
+        status: a.status === 'Pending' 
+          ? 'Pending Review' as const 
+          : (a.status === 'Approved' ? 'Approved & Processed' as const : 'Rejected / Returned' as const)
+      }));
+  });
 
   onSlotSelected(slot: { date: string; time: string }): void {
     this.chosenSlot.set(slot);
@@ -189,17 +187,15 @@ export class AppointmentsComponent {
     const slot = this.chosenSlot();
     if (!slot) return;
 
-    const newApt: Appointment = {
-      id: `MSSPF/APT/${Math.floor(800 + Math.random() * 200)}`,
-      type: this.meetingChannel() === 'in-person' ? 'In-Person (HQ Office)' : 'Phone Consultation',
+    // Push new appointment to central AdminDataService shared signal
+    this.adminData.addAppointment({
+      officerId: '08412952',
+      officerName: 'Salim Al-Abri',
       date: slot.date,
-      time: slot.time,
-      officer: 'Officer Khalid Al-Masroori',
-      status: 'Pending Review'
-    };
+      timeSlot: slot.time,
+      channel: this.meetingChannel() === 'in-person' ? 'In-Person' : 'Phone'
+    });
 
-    // Append to list using signal update
-    this.appointments.update(list => [newApt, ...list]);
     this.notification.success(this.lang.t('apt.success'));
     
     // Reset values

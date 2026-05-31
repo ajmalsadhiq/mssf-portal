@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LanguageService } from '../../core/services/language.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { AdminDataService } from '../../core/services/admin-data.service';
 import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 import { FileUploaderComponent } from '../../shared/file-uploader/file-uploader.component';
 import { AppHeaderComponent } from '../../shared/header/header.component';
@@ -188,6 +189,7 @@ export class CompanyComponent {
 
   readonly isSuccess = signal<boolean>(false);
   readonly crFile = signal<File | null>(null);
+  private readonly adminData = inject(AdminDataService);
 
   readonly regForm: FormGroup;
   readonly referenceNo = Math.floor(10000 + Math.random() * 90000);
@@ -210,6 +212,19 @@ export class CompanyComponent {
   onSubmit(): void {
     if (this.regForm.invalid || !this.crFile()) return;
     
+    // Push supplier registration dossier to AdminDataService shared signal
+    const val = this.regForm.value;
+    this.adminData.addCompanyRegistration({
+      companyName: val.companyName,
+      crNumber: val.crNumber,
+      crExpiry: val.crExpiry,
+      contactPerson: val.contactPerson,
+      phone: val.phone,
+      email: val.email,
+      categories: ['Tactical Logistics Supplier'],
+      crFileName: this.crFile()?.name || 'cr_certificate.pdf'
+    });
+
     this.isSuccess.set(true);
     this.notification.success(
       this.lang.isRtl() 

@@ -1,8 +1,10 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription, interval } from 'rxjs';
 import { LanguageService } from '../../../core/services/language.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { NewsService } from '../../../core/services/news.service';
 import { BreadcrumbComponent } from '../../../shared/breadcrumb/breadcrumb.component';
 
 interface Article {
@@ -146,73 +148,76 @@ interface Article {
     </div>
   `
 })
-export class NewsComponent {
+export class NewsComponent implements OnInit, OnDestroy {
   readonly lang = inject(LanguageService);
   private readonly notification = inject(NotificationService);
+  private readonly newsService = inject(NewsService);
 
   readonly searchQuery = signal<string>('');
   readonly activeTab = signal<'all' | 'news' | 'publication'>('all');
 
-  readonly articles: Article[] = [
-    {
-      id: 'art-1',
-      titleEn: 'MSSPF Board Reviews Strategic Financial Performance and Assets Growth',
-      titleAr: 'مجلس إدارة الصندوق يستعرض الأداء المالي واستراتيجيات نمو الأصول الاستثمارية',
-      date: 'May 28, 2026',
-      category: 'news',
-      descEn: 'The board of directors convened a strategic session at the Muscat headquarters to analyze investment portfolios and check efficiency metrics.',
-      descAr: 'عقد مجلس إدارة صندوق تقاعد الأجهزة العسكرية والأمنية اجتماعاً في مقر الصندوق بمسقط لمراجعة تقارير الاستثمار ونسب نمو الأصول.',
-      imageWord: 'FINANCE UPDATE'
-    },
-    {
-      id: 'art-2',
-      titleEn: 'Official Digitalization Drive: Integrated Portal Services Formally Deployed',
-      titleAr: 'صندوق التقاعد يطلق الحزمة المتكاملة للخدمات الإلكترونية والبوابات الرقمية المطورة',
-      date: 'May 24, 2026',
-      category: 'news',
-      descEn: 'In alignment with Oman Vision 2040, MSSPF announces the formal expansion of its multi-portal web environments supporting banks, retirees, and judicial branches.',
-      descAr: 'تماشياً مع رؤية عمان 2040، يعلن الصندوق رسمياً عن بدء تشغيل بوابات الربط الرقمي المحدثة المخصصة للمتقاعدين والبنوك والجهات القضائية.',
-      imageWord: 'DIGITAL TECH'
-    },
-    {
-      id: 'art-3',
-      titleEn: 'MSSPF Annual Financial Stewardship Performance Review Report 2025',
-      titleAr: 'التقرير السنوي لإدارة الأصول والأداء المالي لصندوق التقاعد للعام ٢٠٢٥',
-      date: 'May 10, 2026',
-      category: 'publication',
-      descEn: 'The official certified report outlining pension assets performance, fund valuation updates, and legal contribution aggregates for the fiscal year 2025.',
-      descAr: 'التقرير السنوي الموثق والمفصل المستعرض لنسب عوائد الاستثمارات السيادية وحجم المعاشات والالتزامات للعام المالي المنصرم 2025.',
-      imageWord: 'ANNUAL REPORT 2025',
-      downloadable: true
-    },
-    {
-      id: 'art-4',
-      titleEn: 'Important Advisory Regarding Military Funeral Claims Process',
-      titleAr: 'تنبيه إرشادي هام حول شروط وإجراءات صرف مستحقات الجنازة والتعازي الاستثنائية',
-      date: 'May 18, 2026',
-      category: 'news',
-      descEn: 'Claimants filing for military funeral benefits are advised to submit legal death certificates and bank cards directly through our unauthenticated visitor claim wizard.',
-      descAr: 'يسترعي الصندوق عناية المواطنين بضرورة إرفاق شهادات الوفاة وحصر الإرث مباشرة من خلال معالج صرف مستحقات مصاريف الجنازة كزائر.',
-      imageWord: 'ADVISORY BOARD'
-    },
-    {
-      id: 'art-5',
-      titleEn: 'MSSPF Legal Frameworks & Retiree Welfare Rights Executive Guide',
-      titleAr: 'الدليل الإرشادي الشامل للوائح القانونية وحقوق المتقاعدين العسكريين وأسرهم',
-      date: 'Apr 25, 2026',
-      category: 'publication',
-      descEn: 'A comprehensive handbook listing pension eligibility rules, ranking factors, calculation multipliers, and legal deduction thresholds for Omani officers.',
-      descAr: 'كتيب توعوي متكامل يستعرض أحكام قانون تقاعد الأجهزة العسكرية وعلاوات التقاعد الثابتة وشروط الاستحقاق للورثة والمتقاعدين.',
-      imageWord: 'WELFARE RIGHTS HANDBOOK',
-      downloadable: true
+  readonly articles = signal<Article[]>([]);
+  private newsSubscription?: Subscription;
+
+  ngOnInit(): void {
+    // 1. Pre-populate instantly with high-fidelity dynamic fallback news if any
+    this.loadNewsData();
+
+    // 2. Asynchronously fetch live Omani/GCC headlines from Newsdata.io on load
+    this.newsService.getLiveNews().subscribe(liveNews => {
+      this.updateNewsList(liveNews);
+    });
+
+    // 3. Auto-refresh the live news feed every 5 minutes dynamically
+    this.newsSubscription = interval(300000).subscribe(() => {
+      this.newsService.getLiveNews().subscribe(liveNews => {
+        this.updateNewsList(liveNews);
+      });
+    });
+  }
+
+  loadNewsData(): void {
+    const fallbackNewsMapped: Article[] = this.newsService.getFallbackNews().map((art, idx) => ({
+      id: `live-art-${idx}`,
+      titleEn: art.titleEn,
+      titleAr: art.titleAr,
+      date: art.date,
+      category: 'news' as const,
+      descEn: art.descEn,
+      descAr: art.descAr,
+      imageWord: art.categoryEn.toUpperCase()
+    }));
+    this.articles.set(fallbackNewsMapped);
+  }
+
+  updateNewsList(liveNews: any[]): void {
+    if (liveNews && liveNews.length > 0) {
+      const liveNewsMapped: Article[] = liveNews.map((art, idx) => ({
+        id: `live-art-${idx}`,
+        titleEn: art.titleEn,
+        titleAr: art.titleAr,
+        date: art.date,
+        category: 'news' as const,
+        descEn: art.descEn,
+        descAr: art.descAr,
+        imageWord: art.categoryEn.toUpperCase()
+      }));
+      this.articles.set(liveNewsMapped);
     }
-  ];
+  }
+
+  ngOnDestroy(): void {
+    // Clean up timer subscription to prevent memory leaks
+    if (this.newsSubscription) {
+      this.newsSubscription.unsubscribe();
+    }
+  }
 
   // Computed signal to filter articles locally
   readonly filteredArticles = computed(() => {
     const tab = this.activeTab();
     const query = this.searchQuery().toLowerCase().trim();
-    let rows = this.articles;
+    let rows = this.articles();
 
     // Tab category filter
     if (tab !== 'all') {

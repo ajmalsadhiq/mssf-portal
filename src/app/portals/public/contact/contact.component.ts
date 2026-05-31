@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { LanguageService } from '../../../core/services/language.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { BreadcrumbComponent } from '../../../shared/breadcrumb/breadcrumb.component';
+import { AdminDataService } from '../../../core/services/admin-data.service';
 
 @Component({
   selector: 'app-contact',
@@ -85,8 +86,8 @@ import { BreadcrumbComponent } from '../../../shared/breadcrumb/breadcrumb.compo
                 <option value="pension">Pension Calculation & Welfare Claims</option>
                 <option value="iban">Bank Details & IBAN Updates</option>
                 <option value="funeral">Funeral Claims & Bereavement Grants</option>
-                <option value="technical">Website & Portal Access Issues</option>
-                <option value="other">General Inquiries & Feedback</option>
+                <option value="technical">Website & Technical Portal Access Issues</option>
+                <option value="other">General Feedback & Citizen Suggestions</option>
               </select>
             </div>
 
@@ -168,6 +169,7 @@ export class ContactComponent {
   readonly lang = inject(LanguageService);
   private readonly fb = inject(FormBuilder);
   private readonly notification = inject(NotificationService);
+  private readonly adminData = inject(AdminDataService);
 
   readonly contactForm: FormGroup;
 
@@ -184,7 +186,17 @@ export class ContactComponent {
   onSubmit(): void {
     if (this.contactForm.invalid) return;
 
-    // Simulate submission delay
+    const val = this.contactForm.value;
+    
+    // Push the suggestion to AdminDataService shared signal
+    this.adminData.addSuggestion({
+      name: val.fullName,
+      email: val.email,
+      phone: val.mobile,
+      subject: this.getSubjectLabel(val.subject),
+      message: val.message
+    });
+
     this.notification.success(
       this.lang.isRtl()
         ? 'تم إرسال استفسارك بنجاح. سيقوم أحد موظفي الصندوق بالرد عليك هاتفياً أو عبر البريد قريباً.'
@@ -193,5 +205,16 @@ export class ContactComponent {
     this.contactForm.reset({
       subject: 'pension'
     });
+  }
+
+  private getSubjectLabel(subjectKey: string): string {
+    const labels: Record<string, string> = {
+      'pension': 'Pension Calculation & Welfare Claims',
+      'iban': 'Bank Details & IBAN Updates',
+      'funeral': 'Funeral Claims & Bereavement Grants',
+      'technical': 'Website & Technical Portal Access Issues',
+      'other': 'General Feedback & Citizen Suggestions'
+    };
+    return labels[subjectKey] || subjectKey;
   }
 }

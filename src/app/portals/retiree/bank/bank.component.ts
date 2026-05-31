@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { LanguageService } from '../../../core/services/language.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AdminDataService } from '../../../core/services/admin-data.service';
 import { BreadcrumbComponent } from '../../../shared/breadcrumb/breadcrumb.component';
 import { FileUploaderComponent } from '../../../shared/file-uploader/file-uploader.component';
 import { OtpInputComponent } from '../../../shared/otp-input/otp-input.component';
@@ -209,6 +210,7 @@ export class BankComponent {
   readonly auth = inject(AuthService);
   private readonly fb = inject(FormBuilder);
   private readonly notification = inject(NotificationService);
+  private readonly adminData = inject(AdminDataService);
 
   readonly updateStep = signal<'form' | 'otp'>('form');
   readonly letterFile = signal<File | null>(null);
@@ -273,9 +275,6 @@ export class BankComponent {
     if (otp.length === 6) {
       const { bankName, iban } = this.ibanForm.value;
       
-      // Update session values
-      this.auth.updateIBAN(iban);
-
       // Prepend to history table
       const newLog: IbanHistory = {
         date: new Date().toISOString().split('T')[0],
@@ -285,6 +284,15 @@ export class BankComponent {
       };
       
       this.historyLogs.update(logs => [newLog, ...logs]);
+
+      // Push global request to AdminDataService for Admin approval!
+      this.adminData.addIbanRequest({
+        officerId: this.auth.currentUser()?.civilId || '08412952',
+        officerName: this.auth.currentUser()?.fullNameEn || 'Salim Al-Abri',
+        bankName,
+        newIban: iban,
+        letterFileName: this.letterFile()?.name || 'iban_letter.pdf'
+      });
       
       this.notification.success(
         this.lang.isRtl()

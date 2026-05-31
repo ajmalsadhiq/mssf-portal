@@ -13,6 +13,7 @@ export class LanguageService {
     'app.desc': { en: 'Military and Security Services Pension Fund', ar: 'صندوق تقاعد الأجهزة العسكرية والأمنية - سلطنة عمان' },
     'portal.public': { en: 'Public Website', ar: 'الموقع العام' },
     'portal.retiree': { en: 'Retiree Portal', ar: 'بوابة المتقاعدين' },
+    'portal.admin': { en: 'Admin Command Portal', ar: 'بوابة التحكم الإدارية' },
     'portal.visitor': { en: 'Visitor Portal', ar: 'بوابة الزوار' },
     'portal.company': { en: 'Company Registration', ar: 'تسجيل الشركات' },
     'portal.bank': { en: 'Bank Portal', ar: 'بوابة البنوك' },

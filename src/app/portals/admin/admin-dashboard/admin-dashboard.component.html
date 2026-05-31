@@ -1,0 +1,968 @@
+<div class="flex flex-col gap-6" [dir]="lang.isRtl() ? 'rtl' : 'ltr'">
+
+  <!-- Dynamic Section Header -->
+  <div class="mb-4 animate-fade-in-up">
+    <span class="text-[9px] text-stone-400 font-bold uppercase tracking-wider">
+      MSSPF Sovereign Control Center
+    </span>
+    <h2 class="font-display text-xl sm:text-2xl font-bold text-primary mb-1">
+      <span *ngIf="activeTab === 'dash'">📊 Dashboard Overview / لوحة المراقبة</span>
+      <span *ngIf="activeTab === 'retirees'">🪖 Retirees Directory / دليل المتقاعدين</span>
+      <span *ngIf="activeTab === 'appointments'">📅 Appointments Review / مراجعة المواعيد</span>
+      <span *ngIf="activeTab === 'claims'">🕊️ Funeral Claims / مستحقات الجنازة</span>
+      <span *ngIf="activeTab === 'companies'">🏢 Supplier Registrations / تسجيل الشركات</span>
+      <span *ngIf="activeTab === 'court'">⚖️ Court Portal Settings / مواعيد المحاكم</span>
+      <span *ngIf="activeTab === 'news'">📰 Press News Manager / إدارة الأخبار</span>
+      <span *ngIf="activeTab === 'hotline'">📞 Hotline & System Alerts / الهاتف والطوارئ</span>
+      <span *ngIf="activeTab === 'suggestions'">💬 Suggestions & Feedback / المقترحات والآراء</span>
+    </h2>
+    <div class="w-12 h-0.5 bg-accent rounded-full mt-1"></div>
+  </div>
+
+  <!-- TAB 1: DASHBOARD OVERVIEW -->
+  <div *ngIf="activeTab === 'dash'" class="flex flex-col gap-6 animate-fade-in-up">
+    <!-- Welcome Panel -->
+    <div class="bg-gradient-to-r from-primary-light to-primary p-6 sm:p-8 rounded-2xl text-white relative overflow-hidden border border-accent/20 shadow-md">
+      <div class="absolute inset-0 bg-cover bg-center bg-no-repeat mix-blend-overlay opacity-15" style="background-image: url('/oman_bg.png');"></div>
+      <div class="relative z-10 space-y-2">
+        <h3 class="font-display text-lg sm:text-xl font-extrabold text-accent">Welcome, Administrator of the Pension Fund</h3>
+        <h4 class="font-arabic text-md sm:text-lg font-bold leading-normal text-stone-200" [dir]="'rtl'">أهلاً بك، مدير صندوق تقاعد الأجهزة العسكرية والأمنية</h4>
+        <p class="text-stone-300 text-[11px] font-semibold max-w-xl leading-relaxed mt-2">
+          Securely manage active military claimant databases, oversee bank settlement directives, approve bereavement dockets, and govern court integration rules across the Sultanate.
+        </p>
+      </div>
+    </div>
+
+    <!-- Quick counters grid -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+      
+      <!-- Retirees Counter -->
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Total Registered Retirees</span>
+          <span class="text-lg">🪖</span>
+        </div>
+        <div class="mt-4">
+          <span class="text-3xl font-black text-primary">{{ adminData.retirees().length }}</span>
+          <span class="text-[10px] text-stone-400 font-bold uppercase block mt-1">Active retired officers</span>
+        </div>
+      </div>
+
+      <!-- Appointments Counter -->
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Pending Appointments</span>
+          <span class="text-lg">📅</span>
+        </div>
+        <div class="mt-4">
+          <span class="text-3xl font-black text-amber-600">{{ adminData.appointments().filter(a => a.status === 'Pending').length }}</span>
+          <span class="text-[10px] text-stone-400 font-bold uppercase block mt-1">Awaiting approval</span>
+        </div>
+      </div>
+
+      <!-- Funeral Claims Counter -->
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Pending Funeral Claims</span>
+          <span class="text-lg">🕊️</span>
+        </div>
+        <div class="mt-4">
+          <span class="text-3xl font-black text-rose-600">{{ adminData.funeralClaims().filter(c => c.status === 'Pending Review').length }}</span>
+          <span class="text-[10px] text-stone-400 font-bold uppercase block mt-1">Claims under review</span>
+        </div>
+      </div>
+
+      <!-- Supplier registrations Counter -->
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Supplier Registrations</span>
+          <span class="text-lg">🏢</span>
+        </div>
+        <div class="mt-4">
+          <span class="text-3xl font-black text-primary">{{ adminData.companyRegistrations().length }}</span>
+          <span class="text-[10px] text-stone-400 font-bold uppercase block mt-1">Commercial suppliers dockets</span>
+        </div>
+      </div>
+
+      <!-- Suggestions Counter -->
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Feedback & Suggestions</span>
+          <span class="text-lg">💬</span>
+        </div>
+        <div class="mt-4">
+          <span class="text-3xl font-black text-primary">{{ adminData.suggestions().length }}</span>
+          <span class="text-[10px] text-stone-400 font-bold uppercase block mt-1">Citizen suggestion tickets</span>
+        </div>
+      </div>
+
+      <!-- System Alert Status -->
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">System Alert Banner</span>
+          <span class="text-lg">🚨</span>
+        </div>
+        <div class="mt-4 flex flex-col gap-1.5">
+          <span 
+            class="text-xs font-bold px-3 py-1 rounded w-max select-none"
+            [ngClass]="adminData.hotlineSettings().isAlertActive ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-stone-100 text-stone-600'"
+          >
+            {{ adminData.hotlineSettings().isAlertActive ? 'ACTIVE / نشط' : 'INACTIVE / غير نشط' }}
+          </span>
+          <span class="text-[9px] text-stone-400 font-bold uppercase mt-1">Homepage banner indicator</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TAB 2: RETIREES DIRECTORY -->
+  <div *ngIf="activeTab === 'retirees'" class="flex flex-col gap-6 animate-fade-in-up">
+    <!-- Controls Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+      <div class="relative w-full sm:w-80">
+        <input 
+          type="text" 
+          [ngModel]="retireeQuery()"
+          (ngModelChange)="retireeQuery.set($event)"
+          placeholder="Search retirees by Name, ID, Rank..." 
+          class="w-full pl-4 pr-4 py-2 border border-stone-200 rounded-xl text-xs font-medium outline-none focus:ring-1 focus:ring-accent"
+        />
+      </div>
+      <button 
+        (click)="showAddRetiree.set(!showAddRetiree())"
+        class="w-full sm:w-auto px-5 py-2 rounded-xl bg-primary hover:bg-primary-light text-accent text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+      >
+        <span>{{ showAddRetiree() ? 'Close Registration Form' : 'Register New Retiree Officer' }}</span>
+      </button>
+    </div>
+
+    <!-- Registration Expandable Form -->
+    <div *ngIf="showAddRetiree()" class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex flex-col gap-4 animate-fade-in-up">
+      <h3 class="font-display text-xs font-bold text-stone-700 uppercase tracking-wider mb-2 border-l-2 border-accent pl-2">
+        New Retired Officer Profile Dossier
+      </h3>
+      <form [formGroup]="retireeForm" (ngSubmit)="submitRetiree()" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">Civil ID / Officer ID</label>
+          <input type="text" formControlName="officerId" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs font-mono font-bold tracking-widest text-center" placeholder="08412952" maxLength="8" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">Officer Full Name (English)</label>
+          <input type="text" formControlName="fullNameEn" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs" placeholder="e.g. Salem Al-Abri" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">Officer Full Name (Arabic)</label>
+          <input type="text" formControlName="fullNameAr" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs text-right" placeholder="مثال: سالم العبري" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">Military Rank / Category</label>
+          <select formControlName="rankEn" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs bg-white">
+            <option value="Lieutenant">Lieutenant / ملازم</option>
+            <option value="Captain">Captain / نقيب</option>
+            <option value="Major">Major / رائد</option>
+            <option value="Lieutenant Colonel">Lieutenant Colonel / مقدم</option>
+            <option value="Colonel">Colonel / عقيد</option>
+            <option value="Brigadier General">Brigadier General / عميد</option>
+            <option value="Major General">Major General / لواء</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">Military Force Branch</label>
+          <select formControlName="branchEn" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs bg-white">
+            <option value="Royal Army of Oman">Royal Army of Oman / الجيش السلطاني العماني</option>
+            <option value="Royal Air Force of Oman">Royal Air Force of Oman / سلاح الجو السلطاني العماني</option>
+            <option value="Royal Navy of Oman">Royal Navy of Oman / البحرية السلطانية العمانية</option>
+            <option value="Royal Guard of Oman">Royal Guard of Oman / الحرس السلطاني العماني</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">Last Active Basic Salary (OMR)</label>
+          <input type="number" formControlName="basicSalary" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs font-mono" placeholder="1200" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">Years of Dedicated Service</label>
+          <input type="number" formControlName="yearsOfService" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs font-mono" placeholder="24" />
+        </div>
+
+        <div class="sm:col-span-3 flex justify-end gap-2 mt-2">
+          <button type="button" (click)="showAddRetiree.set(false)" class="px-4 py-2 rounded-xl border border-stone-200 text-xs font-semibold hover:bg-stone-50 cursor-pointer">Cancel</button>
+          <button type="submit" [disabled]="retireeForm.invalid" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent-light text-primary text-xs font-bold transition-all shadow-sm disabled:opacity-40 cursor-pointer">Register Profile</button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Directory Table Grid -->
+    <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden animate-fade-in-up">
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-left text-xs text-stone-500">
+          <thead class="bg-stone-50 font-bold text-stone-700 border-b border-stone-200 uppercase tracking-wider text-[10px]">
+            <tr>
+              <th class="p-4">Officer ID / Civil ID</th>
+              <th class="p-4">Officer Name</th>
+              <th class="p-4">Military Force</th>
+              <th class="p-4">Rank</th>
+              <th class="p-4 text-center">Service Years</th>
+              <th class="p-4 text-right">Pension Amount (OMR)</th>
+              <th class="p-4 text-center">Status / Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-100 font-semibold leading-relaxed">
+            <tr *ngFor="let ret of filteredRetirees()" class="hover:bg-stone-50/50">
+              <td class="p-4 font-mono font-bold tracking-wider">{{ ret.officerId }}</td>
+              <td class="p-4 text-primary font-bold">
+                <div>{{ ret.fullNameEn }}</div>
+                <div class="text-[10px] text-stone-400 font-arabic font-normal" [dir]="'rtl'">{{ ret.fullNameAr }}</div>
+              </td>
+              <td class="p-4 text-[10px]">
+                <div>{{ ret.branchEn }}</div>
+                <div class="text-[9px] text-stone-400 font-arabic font-normal" [dir]="'rtl'">{{ ret.branchAr }}</div>
+              </td>
+              <td class="p-4 font-bold text-stone-600">
+                <div>{{ ret.rankEn }}</div>
+                <div class="text-[10px] text-accent font-arabic font-normal" [dir]="'rtl'">{{ ret.rankAr }}</div>
+              </td>
+              <td class="p-4 text-center font-mono">{{ ret.yearsOfService }} yrs</td>
+              <td class="p-4 text-right font-mono text-primary font-black text-xs">{{ ret.pensionAmount | number:'1.3-3' }} OMR</td>
+              <td class="p-4 text-center flex flex-col items-center justify-center gap-1.5">
+                <span 
+                  class="px-2 py-0.5 rounded text-[9px] font-black uppercase inline-block select-none"
+                  [ngClass]="ret.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'"
+                >
+                  {{ ret.status }}
+                </span>
+                <button 
+                  (click)="toggleRetireeStatus(ret.officerId)"
+                  class="text-[9px] text-accent hover:text-accent-light font-bold hover:underline cursor-pointer"
+                >
+                  {{ ret.status === 'Active' ? 'Suspend Account' : 'Activate Account' }}
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredRetirees().length === 0">
+              <td colspan="7" class="p-8 text-center text-stone-400 font-medium italic">
+                No matching retired military officers found.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: APPOINTMENTS REVIEW -->
+  <div *ngIf="activeTab === 'appointments'" class="flex flex-col gap-6 animate-fade-in-up">
+    <!-- Controls Header -->
+    <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+      <input 
+        type="text" 
+        [ngModel]="appointmentQuery()"
+        (ngModelChange)="appointmentQuery.set($event)"
+        placeholder="Filter appointments by Officer ID, Name, Channel..." 
+        class="w-full sm:w-80 pl-4 pr-4 py-2 border border-stone-200 rounded-xl text-xs font-medium outline-none focus:ring-1 focus:ring-accent"
+      />
+    </div>
+
+    <!-- Active Review Ledger -->
+    <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden animate-fade-in-up">
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-left text-xs text-stone-500">
+          <thead class="bg-stone-50 font-bold text-stone-700 border-b border-stone-200 uppercase tracking-wider text-[10px]">
+            <tr>
+              <th class="p-4">Officer ID</th>
+              <th class="p-4">Officer Name</th>
+              <th class="p-4">Appointment Date</th>
+              <th class="p-4">Time Slot</th>
+              <th class="p-4">Consultation Channel</th>
+              <th class="p-4 text-center">Status</th>
+              <th class="p-4 text-center">Administrative Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-100 font-semibold leading-relaxed">
+            <tr *ngFor="let apt of filteredAppointments()" class="hover:bg-stone-50/50">
+              <td class="p-4 font-mono font-bold tracking-wider">{{ apt.officerId }}</td>
+              <td class="p-4 text-primary font-bold">{{ apt.officerName }}</td>
+              <td class="p-4 text-stone-600 font-bold">{{ apt.date }}</td>
+              <td class="p-4 font-mono text-stone-600">{{ apt.timeSlot }}</td>
+              <td class="p-4 font-bold">
+                <span class="px-2.5 py-1 rounded bg-stone-100 text-stone-700 text-[10px] uppercase font-black tracking-wider">
+                  {{ apt.channel }}
+                </span>
+              </td>
+              <td class="p-4 text-center">
+                <span 
+                  class="px-2.5 py-0.5 rounded text-[9px] font-black uppercase inline-block select-none"
+                  [ngClass]="{
+                    'bg-amber-50 text-amber-700': apt.status === 'Pending',
+                    'bg-emerald-50 text-emerald-700': apt.status === 'Approved',
+                    'bg-rose-50 text-rose-700': apt.status === 'Rejected'
+                  }"
+                >
+                  {{ apt.status }}
+                </span>
+              </td>
+              <td class="p-4 text-center">
+                <div *ngIf="apt.status === 'Pending'" class="flex justify-center gap-1.5">
+                  <button 
+                    (click)="acceptApt(apt.id)"
+                    class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-bold transition-all shadow-sm cursor-pointer"
+                  >
+                    Accept
+                  </button>
+                  <button 
+                    (click)="rejectApt(apt.id)"
+                    class="px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[9px] font-bold transition-all shadow-sm cursor-pointer"
+                  >
+                    Reject
+                  </button>
+                </div>
+                <div *ngIf="apt.status !== 'Pending'" class="text-[9px] text-stone-400 italic">
+                  Processed
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredAppointments().length === 0">
+              <td colspan="7" class="p-8 text-center text-stone-400 font-medium italic">
+                No active appointments booked.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: FUNERAL CLAIMS -->
+  <div *ngIf="activeTab === 'claims'" class="flex flex-col gap-6 animate-fade-in-up">
+    <!-- Controls Header -->
+    <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+      <input 
+        type="text" 
+        [ngModel]="claimQuery()"
+        (ngModelChange)="claimQuery.set($event)"
+        placeholder="Filter claims by Deceased ID, Applicant Name, Relationship..." 
+        class="w-full sm:w-80 pl-4 pr-4 py-2 border border-stone-200 rounded-xl text-xs font-medium outline-none focus:ring-1 focus:ring-accent"
+      />
+    </div>
+
+    <!-- Active Claims Cards -->
+    <div class="grid grid-cols-1 gap-6">
+      <div *ngFor="let claim of filteredClaims()" class="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 flex flex-col md:flex-row justify-between gap-6 hover:shadow-md transition-shadow">
+        
+        <!-- Details Column -->
+        <div class="space-y-4 flex-grow">
+          <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+            <span class="text-xs font-black text-primary tracking-wider uppercase">Bereavement Case: {{ claim.id }}</span>
+            <span 
+              class="px-2.5 py-0.5 rounded text-[9px] font-black uppercase select-none"
+              [ngClass]="{
+                'bg-amber-50 text-amber-700': claim.status === 'Pending Review',
+                'bg-emerald-50 text-emerald-700': claim.status === 'Processed & Paid',
+                'bg-rose-50 text-rose-700': claim.status === 'Rejected'
+              }"
+            >
+              {{ claim.status }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs font-semibold text-stone-600">
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">Deceased Officer ID</span>
+              <span class="text-primary font-mono font-bold tracking-widest text-sm block mt-0.5">{{ claim.deceasedId }}</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">Deceased Name</span>
+              <span class="text-primary font-bold block mt-0.5">{{ claim.deceasedName }}</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">Applicant Name / Relationship</span>
+              <span class="text-primary font-bold block mt-0.5">{{ claim.applicantName }} ({{ claim.relationship }})</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">Applicant Contact Telephone</span>
+              <span class="text-stone-600 font-mono block mt-0.5">{{ claim.applicantPhone }}</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">Settlement Bank IBAN</span>
+              <span class="text-primary font-mono font-bold text-xs tracking-wider block mt-0.5">{{ claim.iban }}</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">Filing Submission Date</span>
+              <span class="text-stone-600 block mt-0.5">{{ claim.date }}</span>
+            </div>
+          </div>
+
+          <!-- Document Attachments check list -->
+          <div class="bg-stone-50 p-4 rounded-xl border border-stone-200/50 flex flex-col gap-2">
+            <span class="text-[9px] text-stone-400 font-bold uppercase tracking-wider mb-1">Uploaded Heir & Death Decrees (Simulated)</span>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[10px] font-bold text-stone-600">
+              <div class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-stone-100">
+                📄 heirCert: <span class="text-accent hover:underline font-medium truncate cursor-pointer">{{ claim.heirCert }}</span>
+              </div>
+              <div class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-stone-100">
+                📄 deathCert: <span class="text-accent hover:underline font-medium truncate cursor-pointer">{{ claim.deathCert }}</span>
+              </div>
+              <div class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-stone-100">
+                📄 applicantId: <span class="text-accent hover:underline font-medium truncate cursor-pointer">{{ claim.applicantId }}</span>
+              </div>
+              <div class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-stone-100">
+                📄 bankCard: <span class="text-accent hover:underline font-medium truncate cursor-pointer">{{ claim.bankCard }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions Column -->
+        <div *ngIf="claim.status === 'Pending Review'" class="flex md:flex-col justify-end items-center gap-2 border-t md:border-t-0 md:border-l border-stone-100 pt-4 md:pt-0 md:pl-6 shrink-0 min-w-[120px]">
+          <button 
+            (click)="approveClaim(claim.id)"
+            class="w-full px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+          >
+            Process & Pay
+          </button>
+          <button 
+            (click)="rejectClaim(claim.id)"
+            class="w-full px-4 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-all cursor-pointer"
+          >
+            Reject Claim
+          </button>
+        </div>
+
+      </div>
+
+      <div *ngIf="filteredClaims().length === 0" class="bg-white p-8 text-center rounded-2xl border border-stone-200 text-stone-400 font-medium italic">
+        No bereavement claims filed.
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: SUPPLIER REGISTRATIONS -->
+  <div *ngIf="activeTab === 'companies'" class="flex flex-col gap-6 animate-fade-in-up">
+    <!-- Controls Header -->
+    <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+      <input 
+        type="text" 
+        [ngModel]="companyQuery()"
+        (ngModelChange)="companyQuery.set($event)"
+        placeholder="Filter suppliers by Company Name, CR Number, Contact..." 
+        class="w-full sm:w-80 pl-4 pr-4 py-2 border border-stone-200 rounded-xl text-xs font-medium outline-none focus:ring-1 focus:ring-accent"
+      />
+    </div>
+
+    <!-- Active Suppliers -->
+    <div class="grid grid-cols-1 gap-6 animate-fade-in-up">
+      <div *ngFor="let comp of filteredCompanies()" class="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 flex flex-col md:flex-row justify-between gap-6 hover:shadow-md transition-shadow">
+        
+        <!-- Supplier Details -->
+        <div class="space-y-4 flex-grow">
+          <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+            <span class="text-xs font-black text-primary tracking-wider uppercase">Supplier Case Docket: {{ comp.id }}</span>
+            <span 
+              class="px-2.5 py-0.5 rounded text-[9px] font-black uppercase select-none"
+              [ngClass]="{
+                'bg-amber-50 text-amber-700': comp.status === 'Pending Review',
+                'bg-emerald-50 text-emerald-700': comp.status === 'Approved Supplier',
+                'bg-rose-50 text-rose-700': comp.status === 'Rejected'
+              }"
+            >
+              {{ comp.status }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs font-semibold text-stone-600">
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">Company Commercial Name</span>
+              <span class="text-primary font-bold text-sm block mt-0.5">{{ comp.companyName }}</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">Commercial Registration (CR) #</span>
+              <span class="text-primary font-mono font-bold tracking-wider block mt-0.5">{{ comp.crNumber }}</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">CR Expiry Date</span>
+              <span class="text-stone-600 font-mono block mt-0.5">{{ comp.crExpiry }}</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">Authorized Contact Person</span>
+              <span class="text-primary font-bold block mt-0.5">{{ comp.contactPerson }}</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">Phone / Corporate Email</span>
+              <span class="text-stone-600 block mt-0.5">{{ comp.phone }} / {{ comp.email }}</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-stone-400 font-bold uppercase block tracking-wider">Filing Dossier Date</span>
+              <span class="text-stone-600 block mt-0.5">{{ comp.date }}</span>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <span class="text-[9px] text-stone-400 font-bold uppercase tracking-wider mb-0.5">Commercial Supply Categories</span>
+            <div class="flex flex-wrap gap-1.5">
+              <span *ngFor="let cat of comp.categories" class="px-2.5 py-1 rounded bg-stone-100 text-stone-700 text-[10px] uppercase font-black tracking-wider">
+                {{ cat }}
+              </span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 text-[10px] font-bold text-stone-600">
+            📄 Uploaded CR Certificate PDF: <span class="text-accent hover:underline font-medium cursor-pointer">{{ comp.crFileName }}</span>
+          </div>
+
+        </div>
+
+        <!-- Supplier Actions -->
+        <div *ngIf="comp.status === 'Pending Review'" class="flex md:flex-col justify-end items-center gap-2 border-t md:border-t-0 md:border-l border-stone-100 pt-4 md:pt-0 md:pl-6 shrink-0 min-w-[120px]">
+          <button 
+            (click)="approveCompany(comp.id)"
+            class="w-full px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-light text-accent text-xs font-bold transition-all shadow-sm cursor-pointer"
+          >
+            Approve Supplier
+          </button>
+          <button 
+            (click)="rejectCompany(comp.id)"
+            class="w-full px-4 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-all cursor-pointer"
+          >
+            Reject Supplier
+          </button>
+        </div>
+
+      </div>
+
+      <div *ngIf="filteredCompanies().length === 0" class="bg-white p-8 text-center rounded-2xl border border-stone-200 text-stone-400 font-medium italic">
+        No supplier registrations found.
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 6: COURT PORTAL SETTINGS -->
+  <div *ngIf="activeTab === 'court'" class="flex flex-col gap-6 animate-fade-in-up">
+    <div class="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 sm:p-8 animate-fade-in-up">
+      <h3 class="font-display text-sm font-bold text-primary mb-2 border-b border-stone-100 pb-3">
+        ⚖️ Judicial Portals Operating Schedules & Deduction Limits
+      </h3>
+      
+      <form [formGroup]="courtForm" (ngSubmit)="saveCourtSettings()" class="flex flex-col gap-5 max-w-2xl mt-4">
+        
+        <!-- Muscat Court Hours -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-stone-100 pb-4">
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Muscat Court Hours (English)</label>
+            <input type="text" formControlName="muscatHoursEn" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Muscat Court Hours (Arabic)</label>
+            <input type="text" formControlName="muscatHoursAr" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs text-right" />
+          </div>
+        </div>
+
+        <!-- Seeb Court Hours -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-stone-100 pb-4">
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Al Seeb Court Hours (English)</label>
+            <input type="text" formControlName="seebHoursEn" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Al Seeb Court Hours (Arabic)</label>
+            <input type="text" formControlName="seebHoursAr" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs text-right" />
+          </div>
+        </div>
+
+        <!-- Deduction Caps -->
+        <div class="flex flex-col gap-1.5 max-w-md">
+          <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Maximum Legal Pension Deduction Cap</label>
+          <div class="flex items-center gap-4 mt-1">
+            <input type="range" min="10" max="50" step="5" formControlName="maxDeductionPercent" class="flex-grow h-2 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-accent" />
+            <span class="text-sm font-black text-rose-600 font-mono w-12 text-center">{{ courtForm.value.maxDeductionPercent }}%</span>
+          </div>
+          <span class="text-[9px] text-stone-400 mt-1 leading-relaxed">
+            Note: Governs court executing thresholds. Prevents legal alimony decrees from deducting more than the authorized fraction of basic military pensions.
+          </span>
+        </div>
+
+        <!-- Action Button -->
+        <div class="flex justify-end mt-4 pt-4 border-t border-stone-100">
+          <button 
+            type="submit" 
+            [disabled]="courtForm.invalid" 
+            class="px-6 py-3 rounded-xl bg-accent text-primary hover:bg-accent-light text-xs font-bold transition-all shadow-md cursor-pointer"
+          >
+            Save Court Portal Configuration
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- TAB 7: PRESS NEWS MANAGER -->
+  <div *ngIf="activeTab === 'news'" class="flex flex-col gap-6 animate-fade-in-up">
+    <!-- Controls Header -->
+    <div class="flex justify-end bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+      <button 
+        (click)="showAddNews.set(!showAddNews())"
+        class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-light text-accent text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+      >
+        <span>{{ showAddNews() ? 'Hide Editor' : 'Publish Custom News Announcement' }}</span>
+      </button>
+    </div>
+
+    <!-- Add News Form -->
+    <div *ngIf="showAddNews()" class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex flex-col gap-4 animate-fade-in-up">
+      <h3 class="font-display text-xs font-bold text-stone-700 uppercase tracking-wider mb-2 border-l-2 border-accent pl-2">
+        Publish Dynamic News Announcement
+      </h3>
+      <form [formGroup]="newsForm" (ngSubmit)="submitNews()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">News Headline (English)</label>
+          <input type="text" formControlName="titleEn" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs" placeholder="e.g. Pension Fund Allocates New Development Assets" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">News Headline (Arabic)</label>
+          <input type="text" formControlName="titleAr" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs text-right" placeholder="مثال: الصندوق يوزع عوائد الاستثمار المالي الجديد" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">Category (English)</label>
+          <input type="text" formControlName="categoryEn" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">Category (Arabic)</label>
+          <input type="text" formControlName="categoryAr" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs text-right" />
+        </div>
+
+        <div class="flex flex-col gap-1 sm:col-span-2">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">Announcement Description (English)</label>
+          <textarea formControlName="descEn" rows="3" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs outline-none bg-white focus:ring-1 focus:ring-accent" placeholder="Full descriptive paragraph..."></textarea>
+        </div>
+
+        <div class="flex flex-col gap-1 sm:col-span-2">
+          <label class="text-[9px] font-bold text-stone-500 uppercase tracking-wider">Announcement Description (Arabic)</label>
+          <textarea formControlName="descAr" rows="3" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs text-right outline-none bg-white focus:ring-1 focus:ring-accent" placeholder="نص الوصف الإخباري الكامل للمواطنين..."></textarea>
+        </div>
+
+        <div class="sm:col-span-2 flex justify-end gap-2 mt-2">
+          <button type="button" (click)="showAddNews.set(false)" class="px-4 py-2 rounded-xl border border-stone-200 text-xs font-semibold hover:bg-stone-50 cursor-pointer">Cancel</button>
+          <button type="submit" [disabled]="newsForm.invalid" class="px-5 py-2 rounded-xl bg-accent text-primary hover:bg-accent-light text-xs font-bold transition-all shadow-sm disabled:opacity-40 cursor-pointer">Publish News</button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Active Custom News Articles -->
+    <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden animate-fade-in-up">
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-left text-xs text-stone-500">
+          <thead class="bg-stone-50 font-bold text-stone-700 border-b border-stone-200 uppercase tracking-wider text-[10px]">
+            <tr>
+              <th class="p-4">News Headline</th>
+              <th class="p-4">Category</th>
+              <th class="p-4">Publish Date</th>
+              <th class="p-4 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-100 font-semibold leading-relaxed">
+            <tr *ngFor="let news of adminData.newsArticles()" class="hover:bg-stone-50/50">
+              <td class="p-4 max-w-xs sm:max-w-md">
+                <div class="text-primary font-bold truncate">{{ news.titleEn }}</div>
+                <div class="text-[10px] text-stone-400 font-arabic truncate mt-0.5" [dir]="'rtl'">{{ news.titleAr }}</div>
+              </td>
+              <td class="p-4 font-mono font-bold text-stone-600">
+                <span class="px-2 py-0.5 rounded bg-accent/10 text-accent text-[9px] uppercase tracking-wider">
+                  {{ news.categoryEn }}
+                </span>
+              </td>
+              <td class="p-4 text-stone-600">{{ news.date }}</td>
+              <td class="p-4 text-center">
+                <button 
+                  (click)="retractNews(news.titleEn)"
+                  class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 text-[9px] font-bold transition-colors cursor-pointer"
+                >
+                  Retract Announcement
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="adminData.newsArticles().length === 0">
+              <td colspan="4" class="p-8 text-center text-stone-400 font-medium italic">
+                No custom news articles published by the administrator. (News feed displays only live API articles).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 8: HOTLINE & SYSTEM ALERTS -->
+  <div *ngIf="activeTab === 'hotline'" class="flex flex-col gap-6 animate-fade-in-up">
+    <div class="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 sm:p-8 animate-fade-in-up">
+      <h3 class="font-display text-sm font-bold text-primary mb-2 border-b border-stone-100 pb-3">
+        📞 Hotline Helpline Contacts & Global Alert Banners Settings
+      </h3>
+      
+      <form [formGroup]="hotlineForm" (ngSubmit)="saveHotlineSettings()" class="flex flex-col gap-5 max-w-2xl mt-4">
+        
+        <!-- Official Helpline -->
+        <div class="flex flex-col gap-1.5 max-w-sm">
+          <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Official Helpline Support Number</label>
+          <input type="text" formControlName="hotlineNo" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs font-mono font-bold" />
+          <span class="text-[9px] text-stone-400">Updates the dialing trigger dynamically in the footer and help hotline links of the homepage.</span>
+        </div>
+
+        <!-- Toggle system warning banner -->
+        <div class="flex items-center gap-2 border-t border-stone-100 pt-4 mt-2">
+          <input type="checkbox" formControlName="isAlertActive" id="isAlertActive" class="accent-accent w-4 h-4 cursor-pointer" />
+          <label for="isAlertActive" class="text-xs font-black text-stone-700 uppercase tracking-wider cursor-pointer">
+            Activate System-wide Warning Alert Banner
+          </label>
+        </div>
+
+        <!-- Alert Banner English -->
+        <div class="flex flex-col gap-1">
+          <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Warning Banner Message (English)</label>
+          <textarea formControlName="alertBannerEn" rows="3" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs outline-none bg-white focus:ring-1 focus:ring-accent"></textarea>
+        </div>
+
+        <!-- Alert Banner Arabic -->
+        <div class="flex flex-col gap-1">
+          <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Warning Banner Message (Arabic)</label>
+          <textarea formControlName="alertBannerAr" rows="3" class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs text-right outline-none bg-white focus:ring-1 focus:ring-accent"></textarea>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end mt-4 pt-4 border-t border-stone-100">
+          <button 
+            type="submit" 
+            [disabled]="hotlineForm.invalid" 
+            class="px-6 py-3 rounded-xl bg-accent text-primary hover:bg-accent-light text-xs font-bold transition-all shadow-md cursor-pointer"
+          >
+            Save Helpline Contacts
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- TAB 9: SUGGESTIONS & FEEDBACK -->
+  <div *ngIf="activeTab === 'suggestions'" class="flex flex-col gap-6 animate-fade-in-up">
+    <!-- Active Suggestions -->
+    <div class="grid grid-cols-1 gap-6 animate-fade-in-up">
+      <div *ngFor="let sug of adminData.suggestions()" class="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 flex flex-col justify-between gap-4 hover:shadow-md transition-shadow">
+        
+        <div class="space-y-3">
+          <div class="flex justify-between items-center border-b border-stone-100 pb-2.5">
+            <div class="flex flex-col">
+              <span class="text-xs font-black text-primary uppercase">{{ sug.subject }}</span>
+              <span class="text-[9px] text-stone-400 font-bold block mt-0.5">Filed by: {{ sug.name }} on {{ sug.date }}</span>
+            </div>
+            <span class="text-[10px] text-stone-400 font-mono font-bold">{{ sug.phone }} / {{ sug.email }}</span>
+          </div>
+
+          <p class="text-xs text-stone-500 font-semibold leading-relaxed mt-2 p-3 bg-stone-50 rounded-xl border border-stone-200/50">
+            "{{ sug.message }}"
+          </p>
+        </div>
+
+        <!-- Reply / Dismiss Actions -->
+        <div class="flex justify-end gap-2 border-t border-stone-100 pt-3">
+          <button 
+            (click)="dismissSuggestion(sug.id)"
+            class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold transition-colors cursor-pointer shadow-sm"
+          >
+            Archive / Reply Dismiss
+          </button>
+        </div>
+
+      </div>
+
+      <div *ngIf="adminData.suggestions().length === 0" class="bg-white p-8 text-center rounded-2xl border border-stone-200 text-stone-400 font-medium italic">
+        No suggestion tickets received.
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 10: IBAN CHANGE REQUESTS -->
+  <div *ngIf="activeTab === 'ibans'" class="flex flex-col gap-6 animate-fade-in-up">
+    <!-- Controls Header -->
+    <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+      <input 
+        type="text" 
+        [ngModel]="ibanQuery()"
+        (ngModelChange)="ibanQuery.set($event)"
+        placeholder="Filter IBAN requests by Officer ID, Name, Bank..." 
+        class="w-full sm:w-80 pl-4 pr-4 py-2 border border-stone-200 rounded-xl text-xs font-medium outline-none focus:ring-1 focus:ring-accent"
+      />
+    </div>
+
+    <!-- IBAN Requests Ledger -->
+    <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden animate-fade-in-up">
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-left text-xs text-stone-500">
+          <thead class="bg-stone-50 font-bold text-stone-700 border-b border-stone-200 uppercase tracking-wider text-[10px]">
+            <tr>
+              <th class="p-4">Officer ID / Civil ID</th>
+              <th class="p-4">Officer Name</th>
+              <th class="p-4">Requested Bank</th>
+              <th class="p-4">New IBAN Number</th>
+              <th class="p-4">Attached Documents</th>
+              <th class="p-4 text-center">Status</th>
+              <th class="p-4 text-center">Administrative Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-100 font-semibold leading-relaxed">
+            <tr *ngFor="let req of filteredIbanRequests()" class="hover:bg-stone-50/50">
+              <td class="p-4 font-mono font-bold tracking-wider">{{ req.officerId }}</td>
+              <td class="p-4 text-primary font-bold">{{ req.officerName }}</td>
+              <td class="p-4 text-stone-600 font-bold">{{ req.bankName }}</td>
+              <td class="p-4 font-mono text-primary font-bold text-xs tracking-wider select-all">{{ req.newIban }}</td>
+              <td class="p-4">
+                <span class="inline-flex items-center gap-1 bg-stone-100 px-2 py-1 rounded text-[10px] text-stone-700 hover:text-accent font-bold hover:underline cursor-pointer">
+                  📄 {{ req.letterFileName }}
+                </span>
+              </td>
+              <td class="p-4 text-center">
+                <span 
+                  class="px-2.5 py-0.5 rounded text-[9px] font-black uppercase inline-block select-none"
+                  [ngClass]="{
+                    'bg-amber-50 text-amber-700': req.status === 'Pending Review',
+                    'bg-emerald-50 text-emerald-700': req.status === 'Approved & Processed',
+                    'bg-rose-50 text-rose-700': req.status === 'Rejected'
+                  }"
+                >
+                  {{ req.status }}
+                </span>
+              </td>
+              <td class="p-4 text-center">
+                <div *ngIf="req.status === 'Pending Review'" class="flex justify-center gap-1.5">
+                  <button 
+                    (click)="approveIban(req.id)"
+                    class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-bold transition-all shadow-sm cursor-pointer"
+                  >
+                    Approve
+                  </button>
+                  <button 
+                    (click)="rejectIban(req.id)"
+                    class="px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[9px] font-bold transition-all shadow-sm cursor-pointer"
+                  >
+                    Reject
+                  </button>
+                </div>
+                <div *ngIf="req.status !== 'Pending Review'" class="text-[9px] text-stone-400 italic">
+                  Archived
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredIbanRequests().length === 0">
+              <td colspan="7" class="p-8 text-center text-stone-400 font-medium italic">
+                No IBAN modification requests queued.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 11: BANK LOAN DIRECTIVES -->
+  <div *ngIf="activeTab === 'bankDeductions'" class="flex flex-col gap-6 animate-fade-in-up">
+    <!-- Controls Header -->
+    <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+      <input 
+        type="text" 
+        [ngModel]="deductionQuery()"
+        (ngModelChange)="deductionQuery.set($event)"
+        placeholder="Filter directives by Borrower, Civil ID, Reference..." 
+        class="w-full sm:w-80 pl-4 pr-4 py-2 border border-stone-200 rounded-xl text-xs font-medium outline-none focus:ring-1 focus:ring-accent"
+      />
+    </div>
+
+    <!-- Bank Directives Table -->
+    <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden animate-fade-in-up">
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-left text-xs text-stone-500">
+          <thead class="bg-stone-50 font-bold text-stone-700 border-b border-stone-200 uppercase tracking-wider text-[10px]">
+            <tr>
+              <th class="p-4">Directive Reference</th>
+              <th class="p-4">Filing Partner Bank</th>
+              <th class="p-4">Borrower Name (Civil ID)</th>
+              <th class="p-4 text-right">Loan Amount</th>
+              <th class="p-4 text-right">Monthly Deduction</th>
+              <th class="p-4 text-center">Directive Type</th>
+              <th class="p-4 text-center">Status</th>
+              <th class="p-4 text-center">Administrative Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-100 font-semibold leading-relaxed">
+            <tr *ngFor="let ded of filteredBankDeductions()" class="hover:bg-stone-50/50">
+              <td class="p-4 font-mono font-bold tracking-wider text-primary">{{ ded.ref }}</td>
+              <td class="p-4 text-stone-600 font-bold">{{ ded.bankName }}</td>
+              <td class="p-4 font-bold">
+                <div>{{ ded.borrower }}</div>
+                <div class="text-[10px] text-stone-400 font-mono mt-0.5">{{ ded.civilId }}</div>
+              </td>
+              <td class="p-4 text-right font-mono font-bold">{{ ded.loanAmount | number:'1.3-3' }} OMR</td>
+              <td class="p-4 text-right font-mono font-black text-rose-600">{{ ded.deductionAmount | number:'1.3-3' }} OMR</td>
+              <td class="p-4 text-center">
+                <span 
+                  class="px-2 py-0.5 rounded text-[9px] font-black uppercase inline-block select-none"
+                  [ngClass]="ded.type === 'Active Deduction' ? 'bg-primary/10 text-primary border border-accent/20' : 'bg-stone-100 text-stone-600'"
+                >
+                  {{ ded.type }}
+                </span>
+              </td>
+              <td class="p-4 text-center">
+                <span 
+                  class="px-2.5 py-0.5 rounded text-[9px] font-black uppercase inline-block select-none"
+                  [ngClass]="{
+                    'bg-amber-50 text-amber-700': ded.status === 'Pending Review',
+                    'bg-emerald-50 text-emerald-700': ded.status === 'Approved & Processed',
+                    'bg-rose-50 text-rose-700': ded.status === 'Rejected / Returned'
+                  }"
+                >
+                  {{ ded.status }}
+                </span>
+              </td>
+              <td class="p-4 text-center">
+                <div *ngIf="ded.status === 'Pending Review'" class="flex justify-center gap-1.5">
+                  <button 
+                    (click)="approveBankDed(ded.ref)"
+                    class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-bold transition-all shadow-sm cursor-pointer"
+                  >
+                    Approve
+                  </button>
+                  <button 
+                    (click)="rejectBankDed(ded.ref)"
+                    class="px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[9px] font-bold transition-all shadow-sm cursor-pointer"
+                  >
+                    Reject
+                  </button>
+                </div>
+                <div *ngIf="ded.status !== 'Pending Review'" class="text-[9px] text-stone-400 italic">
+                  Processed
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredBankDeductions().length === 0">
+              <td colspan="8" class="p-8 text-center text-stone-400 font-medium italic">
+                No bank loan directive requests queued.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>

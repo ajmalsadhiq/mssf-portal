@@ -80,6 +80,10 @@ import { AuthService } from '../../core/services/auth.service';
                     <span class="w-2.5 h-2.5 rounded-full bg-red-600 mr-2 ml-2"></span>
                     {{ lang.t('portal.court') }}
                   </a>
+                  <a (click)="closePortalMenu()" routerLink="/admin" class="flex items-center px-4 py-2.5 hover:bg-accent/10 hover:text-accent transition-colors font-semibold border-t border-accent/10 bg-primary-light/35">
+                    <span class="w-2.5 h-2.5 rounded-full bg-accent mr-2 ml-2"></span>
+                    {{ lang.t('portal.admin') }}
+                  </a>
                 </div>
               }
             </div>
@@ -221,6 +225,10 @@ import { AuthService } from '../../core/services/auth.service';
                   <a (click)="mobileMenuOpen.set(false)" routerLink="/court" class="flex items-center py-2 px-3 hover:bg-accent/10 rounded-lg hover:text-accent transition-colors font-semibold">
                     <span class="w-2 h-2 rounded-full bg-red-600 mr-2 ml-2"></span>
                     {{ lang.t('portal.court') }}
+                  </a>
+                  <a (click)="mobileMenuOpen.set(false)" routerLink="/admin" class="flex items-center py-2 px-3 hover:bg-accent/10 rounded-lg hover:text-accent transition-colors font-semibold border-t border-accent/10 bg-primary-light/35">
+                    <span class="w-2 h-2 rounded-full bg-accent mr-2 ml-2"></span>
+                    {{ lang.t('portal.admin') }}
                   </a>
                 </div>
               </div>

@@ -1,7 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Subscription, interval } from 'rxjs';
 import { LanguageService } from '../../../core/services/language.service';
+import { NewsService } from '../../../core/services/news.service';
+import { AdminDataService } from '../../../core/services/admin-data.service';
 import { CardComponent } from '../../../shared/card/card.component';
 import { PensionCalculatorComponent } from '../../../shared/pension-calc/pension-calc.component';
 
@@ -31,6 +34,16 @@ interface NewsCard {
   imports: [CommonModule, RouterModule, CardComponent, PensionCalculatorComponent],
   template: `
     <div class="flex flex-col w-full min-h-screen" [dir]="lang.isRtl() ? 'rtl' : 'ltr'">
+      
+      <!-- System-wide Warning Alert Banner (Admin Controlled) -->
+      @if (adminData.hotlineSettings().isAlertActive) {
+        <div class="w-full bg-rose-600 text-white font-semibold text-xs px-4 py-3 flex items-center justify-center gap-2 border-b border-rose-700 animate-pulse relative z-30 select-none">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <span class="text-center">{{ lang.isRtl() ? adminData.hotlineSettings().alertBannerAr : adminData.hotlineSettings().alertBannerEn }}</span>
+        </div>
+      }
       
       <!-- 1. Breathtaking Luxurious Hero Banner with Oman stock background image & brown hue overlay -->
       <section class="relative w-full py-24 sm:py-36 overflow-hidden text-white border-b border-accent/25 flex items-center justify-center bg-cover bg-center bg-no-repeat" style="background-image: url('/oman_bg.png');">
@@ -76,6 +89,29 @@ interface NewsCard {
           </div>
         </div>
       </section>
+
+      <!-- 1b. Premium Gold-Bordered Scrolling News Ticker (Pulsing live badge + hover-to-pause marquee) -->
+      <div class="w-full bg-primary-light/95 border-b border-accent/25 py-2.5 overflow-hidden relative z-20 flex items-center h-10 select-none">
+        <div class="absolute left-0 top-0 bottom-0 bg-accent text-primary px-3.5 flex items-center font-smart text-[10px] font-black uppercase tracking-wider z-30 shadow-md">
+          <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse mr-1.5 ml-1.5 inline-block"></span>
+          <span>{{ lang.isRtl() ? 'مباشر' : 'Live Ticker' }}</span>
+        </div>
+        <div class="marquee-container flex items-center gap-12 whitespace-nowrap pl-[110px] animate-marquee font-smart text-xs font-semibold text-stone-200">
+          @for (item of latestNews(); track item.titleEn) {
+            <span class="inline-flex items-center gap-2">
+              <span class="text-accent">•</span>
+              <span>{{ lang.isRtl() ? item.titleAr : item.titleEn }}</span>
+            </span>
+          }
+          <!-- Repeated list to ensure seamless infinite looping -->
+          @for (item of latestNews(); track item.titleEn + '-dup') {
+            <span class="inline-flex items-center gap-2">
+              <span class="text-accent">•</span>
+              <span>{{ lang.isRtl() ? item.titleAr : item.titleEn }}</span>
+            </span>
+          }
+        </div>
+      </div>
 
       <!-- 2. Core System Features / Integration Pillars for Launch Readiness -->
       <section class="py-12 bg-white border-b border-stone-100 shadow-sm relative z-10">
@@ -189,7 +225,7 @@ interface NewsCard {
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            @for (news of latestNews; track news.date) {
+            @for (news of latestNews(); track news.titleEn) {
               <div class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden flex flex-col justify-between p-6 hover:shadow-md transition-shadow">
                 <div>
                   <div class="flex justify-between items-center mb-3">
@@ -229,11 +265,11 @@ interface NewsCard {
             Our specialized Military Pension support desk is available to address queries, verify records, and guide legal claimant steps.
           </p>
           <div class="flex flex-wrap justify-center gap-4 mt-2">
-            <a href="tel:80077777" class="px-5 py-3 rounded-xl bg-accent text-primary hover:bg-accent-light font-extrabold text-xs transition-all shadow-md flex items-center gap-2">
+            <a [href]="'tel:' + adminData.hotlineSettings().hotlineNo" class="px-5 py-3 rounded-xl bg-accent text-primary hover:bg-accent-light font-extrabold text-xs transition-all shadow-md flex items-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
               </svg>
-              <span>Call Hotline (800-77777)</span>
+              <span>Call Hotline ({{ formatHotline(adminData.hotlineSettings().hotlineNo) }})</span>
             </a>
             <a routerLink="/contact" class="px-5 py-3 rounded-xl border border-accent/40 bg-white/5 hover:bg-white/10 text-stone-200 font-extrabold text-xs transition-all shadow-sm">
               {{ lang.t('nav.contact') }}
@@ -245,8 +281,17 @@ interface NewsCard {
     </div>
   `
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   readonly lang = inject(LanguageService);
+  private readonly newsService = inject(NewsService);
+  readonly adminData = inject(AdminDataService);
+
+  formatHotline(no: string): string {
+    if (no.length === 8) {
+      return no.substring(0, 3) + '-' + no.substring(3);
+    }
+    return no;
+  }
 
   readonly quickServices: QuickService[] = [
     {
@@ -305,33 +350,34 @@ export class HomeComponent {
     }
   ];
 
-  readonly latestNews: NewsCard[] = [
-    {
-      titleEn: 'MSSPF Board Reviews Strategic Financial Performance and Assets Growth',
-      titleAr: 'مجلس إدارة الصندوق يستعرض الأداء المالي واستراتيجيات نمو الأصول الاستثمارية',
-      date: 'May 28, 2026',
-      categoryEn: 'Administrative',
-      categoryAr: 'إداري',
-      descEn: 'The board of directors convened a strategic session at the Muscat headquarters to analyze investment portfolios and check efficiency metrics.',
-      descAr: 'عقد مجلس إدارة صندوق تقاعد الأجهزة العسكرية والأمنية اجتماعاً في مقر الصندوق بمسقط لمراجعة تقارير الاستثمار ونسب نمو الأصول.'
-    },
-    {
-      titleEn: 'Official Digitalization Drive: Integrated Portal Services Formally Deployed',
-      titleAr: 'صندوق التقاعد يطلق الحزمة المتكاملة للخدمات الإلكترونية والبوابات الرقمية المطورة',
-      date: 'May 24, 2026',
-      categoryEn: 'Digital',
-      categoryAr: 'رقمي',
-      descEn: 'In alignment with Oman Vision 2040, MSSPF announces the formal expansion of its multi-portal web environments supporting banks, retirees, and judicial branches.',
-      descAr: 'تماشياً مع رؤية عمان 2040، يعلن الصندوق رسمياً عن بدء تشغيل بوابات الربط الرقمي المحدثة المخصصة للمتقاعدين والبنوك والجهات القضائية.'
-    },
-    {
-      titleEn: 'Important Advisory Regarding Military Funeral Claims Process',
-      titleAr: 'تنبيه إرشادي هام حول شروط وإجراءات صرف مستحقات الجنازة والتعازي الاستثنائية',
-      date: 'May 18, 2026',
-      categoryEn: 'Advisory',
-      categoryAr: 'إرشادي',
-      descEn: 'Claimants filing for military funeral benefits are advised to submit legal death certificates and bank cards directly through our unauthenticated visitor claim wizard.',
-      descAr: 'يسترعي الصندوق عناية المواطنين بضرورة إرفاق شهادات الوفاة وحصر الإرث مباشرة من خلال معالج صرف مستحقات مصاريف الجنازة كزائر.'
+  readonly latestNews = signal<NewsCard[]>([]);
+  private newsSubscription?: Subscription;
+
+  ngOnInit(): void {
+    // 1. Pre-populate instantly with high-fidelity Omani fallback news so the page is never empty
+    this.latestNews.set(this.newsService.getFallbackNews());
+
+    // 2. Fetch live Omani/GCC headlines from Newsdata.io on load
+    this.loadLiveNews();
+
+    // 3. Auto-refresh the live news feed every 5 minutes dynamically
+    this.newsSubscription = interval(300000).subscribe(() => {
+      this.loadLiveNews();
+    });
+  }
+
+  loadLiveNews(): void {
+    this.newsService.getLiveNews().subscribe(news => {
+      if (news && news.length > 0) {
+        this.latestNews.set(news);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Clean up timer subscription to prevent background memory leaks
+    if (this.newsSubscription) {
+      this.newsSubscription.unsubscribe();
     }
-  ];
+  }
 }

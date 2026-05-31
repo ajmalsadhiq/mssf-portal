@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LanguageService } from '../../core/services/language.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { AdminDataService } from '../../core/services/admin-data.service';
 import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 import { FileUploaderComponent } from '../../shared/file-uploader/file-uploader.component';
 import { DataTableComponent, TableColumn } from '../../shared/table/table.component';
@@ -68,6 +69,28 @@ interface CourtExecutionLog {
                   >
                     Stop Deduction Request
                   </button>
+                </div>
+              </div>
+
+              <!-- Admin-Controlled Court Timings & Limits Card -->
+              <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex flex-col gap-3">
+                <span class="text-[9px] text-stone-400 font-bold uppercase tracking-wider">Judicial Operating Hours & Regulations</span>
+                <div class="space-y-3 font-semibold text-xs leading-relaxed text-stone-600">
+                  <div class="flex flex-col border-b border-stone-100 pb-2">
+                    <span class="text-[10px] text-stone-400 uppercase font-black tracking-wider">Muscat Primary Execution Court</span>
+                    <span class="text-primary mt-0.5">{{ lang.isRtl() ? adminData.courtSettings().muscatHoursAr : adminData.courtSettings().muscatHoursEn }}</span>
+                  </div>
+                  <div class="flex flex-col border-b border-stone-100 pb-2">
+                    <span class="text-[10px] text-stone-400 uppercase font-black tracking-wider">Al Seeb Primary Execution Court</span>
+                    <span class="text-primary mt-0.5">{{ lang.isRtl() ? adminData.courtSettings().seebHoursAr : adminData.courtSettings().seebHoursEn }}</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-[10px] text-rose-500 uppercase font-black tracking-wider">Maximum Pension Deduction Cap</span>
+                    <span class="text-rose-600 font-bold mt-0.5">{{ adminData.courtSettings().maxDeductionPercent }}% of basic pension</span>
+                  </div>
+                  <div class="text-[9px] text-stone-400 font-normal italic mt-1">
+                    Last updated by administrator: {{ adminData.courtSettings().lastUpdated }}
+                  </div>
                 </div>
               </div>
 
@@ -168,6 +191,7 @@ export class CourtComponent {
   readonly lang = inject(LanguageService);
   private readonly fb = inject(FormBuilder);
   private readonly notification = inject(NotificationService);
+  readonly adminData = inject(AdminDataService);
 
   readonly activeForm = signal<'deduct' | 'stop'>('deduct');
   readonly docFile = signal<File | null>(null);
