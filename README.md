@@ -3,58 +3,10 @@
 
 https://mssf-portal.vercel.app/
 
+
 Welcome to the official repository of the **MSSPF Client Website & Multi-Portal Administration Platform**. This platform is a state-of-the-art, high-fidelity Angular 21 application built to represent a prestigious, government-grade administrative environment for the Sultanate of Oman.
 
 The system is designed with **Tailwind CSS v4** and incorporates a luxurious design system reflecting the dignity of national service: a tailored palette of military brown (`#3E321A`), olive gold (`#9E9B46`), sand cream (`#FAF6F0`), and golden amber highlights (`#D39D55`), fully responsive layouts, smooth micro-animations, and complete bidirectionality (English LTR and Arabic RTL with physical mirroring).
-
----
-
-## 🚀 Architectural Narrative: Your Engineering Journey (For Recruiters)
-
-*When speaking with recruiters, technical leads, or hiring managers, use the narrative below to explain how you conceived, designed, and executed this complex system.*
-
-### "How I Built the MSSPF Multi-Portal Platform from Scratch"
-
-> "To build a modern web platform representing the Sultanate of Oman's Military and Security Services Pension Fund (MSSPF), I followed a meticulous, component-driven development methodology. The project requirements demanded a government-grade digital experience serving seven separate portals under a single cohesive brand. Here is how I brought this project to life, step by step:
->
-> 1. **Framework Selection & Setup**: 
->    I chose **Angular 21** as the core framework because of its strict typing, reliable dependency injection, and native support for enterprise-grade modular routing. I initialized a strict **Standalone Workspace** (strictly no `NgModule` declarations) to keep the bundle lightweight, modular, and optimized.
->
-> 2. **Luxurious Styling & Layout Bidirectionality**:
->    I set up **Tailwind CSS v4** as the styling foundation. Tailwind v4 allows defining custom themes directly in the global css entry point (`src/styles.css`). I defined CSS custom properties for a military-inspired palette: military brown (`#3E321A`), olive gold (`#9E9B46`), gold borders, and elegant serif typography (`Playfair Display` for headlines, `Noto Naskh Arabic` for RTL typography, and `Source Sans 3` for text body). 
->    Crucially, since the application must support both English and Arabic, I designed a custom `LanguageService` that dynamically toggles the HTML `dir` attribute (`ltr` or `rtl`). Tailwind v4 automatically handles text alignment, but I wrote physical mirror utilities (such as `flip-rtl` using `transform: scaleX(-1)`) to dynamically adjust navigation arrows and layout flow.
->
-> 3. **Signals-Based Reactive State Management**:
->    Instead of utilizing heavy external state libraries, I leveraged **Angular Signals**. I built a collection of specialized services inside `core/services/` to manage reactive data flow:
->    * `LanguageService` to compute layout directions and return correct dictionary key translations.
->    * `AuthService` to manage unauthenticated and authenticated sessions (linked via Civil ID and mock OTP).
->    * `PensionService` to store and calculate Omani pension entitlement values using mathematical rank vectors and service duration multipliers.
->    * `ChatService` simulating a real-time reactive live helpdesk using RxJS streaming behaviors.
->
-> 4. **16 Reusable Shared Standalone Components**:
->    To keep the codebase DRY (Don't Repeat Yourself), I built a robust design system containing 16 core components inside `src/app/shared/`:
->    * **Toast Stack**: Dynamic sliding notices loaded app-wide to give users feedback on operations.
->    * **Interactive Header (Navbar) & Sidebar**: Designed with a responsive slide-out **Mobile Drawer**, reducing congestion on smaller screens and ensuring clear text sizes, while integrating the official crest logo.
->    * **Circular OTP Input & Countdown**: A secure form control that automatically blocks inputs when a timer expires.
->    * **Interactive Pension Calculator Component**: A Signal-powered tool that live-estimates net pensions based on salary, service years, and military rank.
->    * **PDF Viewer Previewer**: Mocking official entitlement certification sheets before download.
->    * **Slots Picker & Calendar**: An interactive week-day calendar grid allowing retirees to book appointments.
->    * **Steppers & Timelines**: To render multi-step claim wizards (like the Funeral Claim flow) and audit trails.
->
-> 5. **7 Lazy-Loaded Portal Gateways**:
->    I structured the application routing around 7 key user-specific portals, all lazily loaded to ensure an excellent first-contentful paint:
->    * **Public SEO Website**: General home, about, news listing, interactive calculators, FAQ, and inquiries.
->    * **Retiree Guarded Portal**: Requiring Civil ID & OTP. Contains dashboards, bank account modifications, appointment bookings, certificate mock downloads, and a live-chat room.
->    * **Visitor Portal**: Incorporating a draft-saved claim wizard utilizing `localStorage` to preserve progress.
->    * **Company Registrar**: Providing registration workflows for military contractors.
->    * **Commercial Bank Gateway**: A dedicated dashboard for Omani banks to coordinate loan deductions.
->    * **Ministry of Labor Integration**: Query-only government clearance interface.
->    * **Court & Judicial Executions**: Allowing judicial authorities to upload court-ordered child support deductions.
->
-> 6. **Production Compilation & Polish**:
->    I resolved strict compiler configurations (handling index signatures dynamically via bracket access to comply with strict TypeScript) and achieved a 100% successful production build compile with zero errors."
-
----
 
 ## 📂 Codebase Directory & Functional Map
 
